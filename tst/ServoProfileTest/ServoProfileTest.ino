@@ -11,8 +11,8 @@ float pi_inv = 0.318309886183791;
 
 float pi_oversteps = pi / float(StepNum);
 
-#define MIN_PULSE_WIDTH       544     // the shortest pulse sent to a servo  
-#define MAX_PULSE_WIDTH      2400     // the longest pulse sent to a servo 
+int min_pw =       544;     // the shortest pulse sent to a servo  
+int max_pw   =   2400;     // the longest pulse sent to a servo 
 
 //value = map(value, 0, 180, SERVO_MIN(), SERVO_MAX());
 
@@ -34,7 +34,8 @@ void setup() {
 	}
 
 
-	myServo.attach(1);
+	myServo.attach(2);
+	myServo.write(90);
 	int val = myServo.readMicroseconds();
 	Serial.print("From Library :");
 	Serial.println(val);
