@@ -33,22 +33,22 @@ void setup() {
   }
 
   myServo.attach(2);
-  myServo.write(90);
+  myServo.write(45);
   int val = myServo.readMicroseconds();
   Serial.print("From Library :");
   Serial.println(val);
 
-  int calcval = map(90, 0, 180, min_us, max_us);
+  int calcval = map(45, 0, 180, min_us, max_us);
 
   Serial.print("From Calc :");
   Serial.println(calcval);
 
-  calcval = MapToMicros( 90.0);
+  calcval = MapToMicros( 45.0);
 
   Serial.print("From NewCalc :");
   Serial.println(calcval);
 
-float target_angle = 45;
+float target_angle = 45.0;
    for (int iStep = 0; iStep < StepNum; iStep++)
    {
     Serial.print(target_angle * CurveProfile[iStep],5);
@@ -72,6 +72,8 @@ void loop() {
 
 int MapToMicros(float x)
 {
+  
+  
   // convert the required angle to uS for higher accuracy
   int valout = ( x - min_angle) * (max_us - min_us) / (max_angle - min_angle) + min_us;
   return valout;
