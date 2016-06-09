@@ -29,6 +29,6 @@ max_pw   =   2400;
 target_angle = 98;
 current_angle = 102;
 
-us_45 = map_ard(current_angle + (angle_full * target_angle), 0, 180, min_pw, max_pw);
+us_45 = map_ard(current_angle + (angle_full * (target_angle-current_angle)), 0, 180, min_pw, max_pw);
 
 plot(us_45)
