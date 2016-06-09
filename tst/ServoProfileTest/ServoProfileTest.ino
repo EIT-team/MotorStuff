@@ -57,7 +57,7 @@ float target_angle = 45.0;
 Serial.println("");
    for (int iStep = 0; iStep < StepNum; iStep++)
    {
-    Serial.print(MapToMicros(target_angle * CurveProfile[iStep]),5);
+    Serial.print(MapToMicros(target_angle * CurveProfile[iStep]));
     Serial.print(",");
    }
 
