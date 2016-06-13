@@ -12,3 +12,4 @@
 **/Debug
 **/*.bak
 **/plot.log
+**/*ino*.TMP
