@@ -15,21 +15,32 @@ int LeftMax = 135;
 int RightMin = 50;
 int RightMax = 179;
 
-//potential target positions
-float BACK[3] = { 85,69,139 };
-float FRONT[3] = { 121,65,140 };  // 81 69 139
-float CENTRE[3] = { 102,58,144 };
-float BOTTOM[3] = { 99,50,168 };
-float SIDE[3] = { 104,82,150 };
-float TOP_HIGH[3] = { 104,124,100 };
-float TOP_SIDE[3] = { 65,124,100 };
+int IndicatorPin = 30;
 
-float HOME[3] = { 98,120,90 };
+
+// above centre 104,135,80
+// above side - needed to avoid mount on way out 70 135 110
+// off to side 40,130,100
+
+//potential target positions // old ones
+float BACK[3] = { 85, 69, 139 };
+float FRONT[3] = { 114, 65, 140 }; //121 65, 140 or 117 65,142
+float FRONT_INTER[3] = {114, 65, 137};
+float MIDDLE[3] = { 102, 70, 130 }; //102 58 144
+float BOTTOM[3] = { 102, 58, 150}; // 99 50 168
+float SIDE[3] = { 104, 82, 150 };
+float TOP_HIGH[3] = { 104, 124, 100 };
+float TOP_SIDE[3] = { 65, 124, 100 }; // 104 135 110
+float HOME[3] = { 98, 120, 90 };
+
+float START[3] = {40, 130, 100};
+float MOUNT[3] = {70, 135, 110};
+float ABOVECENTRE[3] = {104, 135, 80};
 
 //global variables of current positions
-float Base_cur = HOME[0];
-float Left_cur = HOME[1];
-float Right_cur = HOME[2];
+float Base_cur = START[0];
+float Left_cur = START[1];
+float Right_cur = START[2];
 
 //servo smoothing stuffs
 int MoveSteps = 10;
@@ -38,7 +49,7 @@ int MoveDelay = 50;
 // sin profile stuff
 const int StepNum = 180;
 float CurveProfile[StepNum] = { 0 };
-//int ProfileDelay = 5; 
+//int ProfileDelay = 5;
 
 //precalc for speed, in case we calc each loop
 const float pi = 3.14159265359;
@@ -53,83 +64,83 @@ const int max_angle = 180;
 
 int MapToMicros(float x)
 {
-	// convert the required angle to uS for higher accuracy - this is how servo library does it 
-	int valout = (x - min_angle) * (max_us - min_us) / (max_angle - min_angle) + min_us - 1;
-	return valout;
+  // convert the required angle to uS for higher accuracy - this is how servo library does it
+  int valout = (x - min_angle) * (max_us - min_us) / (max_angle - min_angle) + min_us - 1;
+  return valout;
 }
 
 void MakeCurveProfile()
 {
-	float curStep = 0;
-	for (int iStep = 0; iStep < StepNum; iStep++)
-	{
-		curStep = float(iStep);
-		CurveProfile[iStep] = pi_inv * ((pi_oversteps * iStep) - (cos(pi_oversteps * iStep) * sin(pi_oversteps * iStep)));
-		//Serial.print(CurveProfile[iStep],5);
-		//Serial.print(",");
-	}
+  float curStep = 0;
+  for (int iStep = 0; iStep < StepNum; iStep++)
+  {
+    curStep = float(iStep);
+    CurveProfile[iStep] = pi_inv * ((pi_oversteps * iStep) - (cos(pi_oversteps * iStep) * sin(pi_oversteps * iStep)));
+    //Serial.print(CurveProfile[iStep],5);
+    //Serial.print(",");
+  }
 }
 
 
 int WriteServoBase(int curStep, float curAngle, float TrgAngle)
 {
-	int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
-	BaseServo.writeMicroseconds(next_us);
-	return next_us;
+  int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
+  BaseServo.writeMicroseconds(next_us);
+  return next_us;
 
 }
 
 int WriteServoLeft(int curStep, float curAngle, float TrgAngle)
 {
-	int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
-	LeftServo.writeMicroseconds(next_us);
-	return next_us;
+  int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
+  LeftServo.writeMicroseconds(next_us);
+  return next_us;
 
 }
 
 int WriteServoRight(int curStep, float curAngle, float TrgAngle)
 {
-	int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
-	RightServo.writeMicroseconds(next_us);
-	return next_us;
+  int next_us = MapToMicros(curAngle + (CurveProfile[curStep] * (TrgAngle - curAngle)));
+  RightServo.writeMicroseconds(next_us);
+  return next_us;
 
 }
 
 
 void MoveServos(float Target_angle_Base, float Target_angle_Left, float Target_angle_Right, int Duration)
 {
-	int cur_us_Base = 0;
-	int cur_us_Left = 0;
-	int cur_us_Right = 0;
+  int cur_us_Base = 0;
+  int cur_us_Left = 0;
+  int cur_us_Right = 0;
 
-	int ProfileDelay = (Duration * 1000) / StepNum; 
+  int ProfileDelay = (Duration * 1000) / StepNum;
 
-	/*
-	Serial.print("Profile delay : ");
-	Serial.println(ProfileDelay);
-	*/
-	
-	for (int iStep = 0; iStep < StepNum; iStep++)
-	{
-		cur_us_Base = WriteServoBase(iStep, Base_cur, Target_angle_Base);
-		cur_us_Left = WriteServoLeft(iStep, Left_cur, Target_angle_Left);
-		cur_us_Right = WriteServoRight(iStep, Right_cur, Target_angle_Right);
-		 /*
-		Serial.print(cur_us_Base);
-		Serial.print(",");
-		Serial.print(cur_us_Left);
-		Serial.print(",");
-		Serial.print(cur_us_Right);
-		Serial.println("");
-		 */
-		delayMicroseconds(ProfileDelay);
-	}
 
-	//Serial.println("");
+  Serial.print("Profile delay : ");
+  Serial.println(ProfileDelay);
 
-	Base_cur = Target_angle_Base;
-	Left_cur = Target_angle_Left;
-	Right_cur = Target_angle_Right;
+
+  for (int iStep = 0; iStep < StepNum; iStep++)
+  {
+    cur_us_Base = WriteServoBase(iStep, Base_cur, Target_angle_Base);
+    cur_us_Left = WriteServoLeft(iStep, Left_cur, Target_angle_Left);
+    cur_us_Right = WriteServoRight(iStep, Right_cur, Target_angle_Right);
+    /*
+      Serial.print(cur_us_Base);
+      Serial.print(",");
+      Serial.print(cur_us_Left);
+      Serial.print(",");
+      Serial.print(cur_us_Right);
+      Serial.println("");
+    */
+    delayMicroseconds(ProfileDelay);
+  }
+
+  //Serial.println("");
+
+  Base_cur = Target_angle_Base;
+  Left_cur = Target_angle_Left;
+  Right_cur = Target_angle_Right;
 
 }
 
@@ -137,89 +148,294 @@ void MoveServos(float Target_angle_Base, float Target_angle_Left, float Target_a
 
 void goNow(float x, float y, float z)
 {
-	BaseServo.write(x);
-	LeftServo.write(y);
-	RightServo.write(z);
+  BaseServo.write(x);
+  LeftServo.write(y);
+  RightServo.write(z);
 
-	//updated globals of current pos
-	Base_cur = float(x);
-	Left_cur = float(y);
-	Right_cur = float(z);
+  //updated globals of current pos
+  Base_cur = float(x);
+  Left_cur = float(y);
+  Right_cur = float(z);
 }
 
 void goSmooth(float x, float y, float z)
 {
-	//get baseline positions
-	float x0 = Base_cur;
-	float y0 = Left_cur;
-	float z0 = Right_cur;
+  //get baseline positions
+  float x0 = Base_cur;
+  float y0 = Left_cur;
+  float z0 = Right_cur;
 
-	float stepdist_x = (x - x0) / MoveSteps;
-	float stepdist_y = (y - y0) / MoveSteps;
-	float stepdist_z = (z - z0) / MoveSteps;
+  float stepdist_x = (x - x0) / MoveSteps;
+  float stepdist_y = (y - y0) / MoveSteps;
+  float stepdist_z = (z - z0) / MoveSteps;
 
-	float cur_x = 0;
-	float cur_y = 0;
-	float cur_z = 0;
+  float cur_x = 0;
+  float cur_y = 0;
+  float cur_z = 0;
 
-	for (int i = 0; i<MoveSteps; i++) {
+  for (int i = 0; i < MoveSteps; i++) {
 
-		cur_x = x0 + (stepdist_x)*i;
-		cur_y = y0 + (stepdist_y)*i;
-		cur_z = z0 + (stepdist_z)*i;
-		goNow(cur_x, cur_y, cur_z);
+    cur_x = x0 + (stepdist_x) * i;
+    cur_y = y0 + (stepdist_y) * i;
+    cur_z = z0 + (stepdist_z) * i;
+    goNow(cur_x, cur_y, cur_z);
 
-		/*
-		Serial.print(cur_x);
-		Serial.print(",");
-		Serial.print(cur_y);
-		Serial.print(",");
-		Serial.print(cur_z);
-		Serial.println("");
-		*/
+    /*
+      Serial.print(cur_x);
+      Serial.print(",");
+      Serial.print(cur_y);
+      Serial.print(",");
+      Serial.print(cur_z);
+      Serial.println("");
+    */
 
-		delay(MoveDelay);
-	}
+    delay(MoveDelay);
+  }
 
-	goNow(x, y, z);
-	
-	/*
-	Serial.print(x);
-	Serial.print(",");
-	Serial.print(y);
-	Serial.print(",");
-	Serial.print(z);
-	Serial.println("");
-	*/
-	
-	delay(MoveDelay);
+  goNow(x, y, z);
+
+  /*
+    Serial.print(x);
+    Serial.print(",");
+    Serial.print(y);
+    Serial.print(",");
+    Serial.print(z);
+    Serial.println("");
+  */
+
+  delay(MoveDelay);
 }
 
 
-void CheckAllPos(int Duration, int Pause)
-
+void CheckAllPos()
 {
-	delay(Pause);
-	Serial.println("Front");
-	MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration);
-	delay(Pause);
-	Serial.println("Back");
-	MoveServos(BACK[0], BACK[1], BACK[2], Duration);
-	delay(Pause);
-	Serial.println("Centre");
-	MoveServos(CENTRE[0], CENTRE[1], CENTRE[2], Duration);
-	delay(Pause);
-	Serial.println("Side");
-	MoveServos(SIDE[0], SIDE[1], SIDE[2], Duration);
-	delay(Pause);
-	Serial.println("Bottom");
-	MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], Duration);
-	delay(Pause);
-	Serial.println("Centre");
-	MoveServos(CENTRE[0], CENTRE[1], CENTRE[2], Duration);
-	delay(Pause);
-	Serial.println("Home");
-	MoveServos(HOME[0], HOME[1], HOME[2], Duration);
+  CentreToFront(2000, 1000);
+  FrontToCentre(2000, 10);
+
+  CentreToBack(2000, 1000);
+  BackToCentre(2000, 10);
+
+  CentreToSide(2000, 1000);
+  SideToCentre(2000, 10);
+
+  CentreToMiddle(2000, 1000);
+  MiddleToCentre(2000, 10);
+
+  CentreToBottom(2000, 1000);
+  BottomToCentre(2000, 10);
+}
+
+void StartToCentre(int Duration, int Pause)
+{
+  delay(Pause);
+  Serial.println("Start");
+  MoveServos(START[0], START[1], START[2], Duration);
+  delay(Pause);
+  Serial.println("Avoiding Mount");
+  MoveServos(MOUNT[0], MOUNT[1], MOUNT[2], Duration);
+  delay(Pause);
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+}
+
+
+void CentreToStart(int Duration, int Pause)
+{
+  delay(Pause);
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+  Serial.println("Avoiding Mount");
+  MoveServos(MOUNT[0], MOUNT[1], MOUNT[2], Duration);
+  delay(Pause);
+  Serial.println("Start");
+  MoveServos(START[0], START[1], START[2], Duration);
+}
+
+void CentreToFront(int Duration, int Pause)
+{
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], 20);
+
+  //MoveServos(FRONT_INTER[0], FRONT_INTER[1], FRONT_INTER[2], Duration);
+
+
+  Serial.println("To The front");
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration);
+  delay(Pause);
+}
+
+void FrontToCentre(int Duration, int Pause)
+{
+  Serial.println("To The front");
+  //MoveServos(FRONT[0], FRONT[1], FRONT[2], 20);
+
+  //MoveServos(FRONT_INTER[0], FRONT_INTER[1], FRONT_INTER[2], 20);
+
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+
+}
+
+void CentreToBack(int Duration, int Pause)
+{
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+
+  Serial.println("To the Back");
+  MoveServos(BACK[0], BACK[1], BACK[2], Duration);
+  delay(Pause);
+}
+
+void BackToCentre(int Duration, int Pause)
+{
+  Serial.println("To The back");
+  MoveServos(BACK[0], BACK[1], BACK[2], Duration);
+
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+
+}
+
+void CentreToSide(int Duration, int Pause)
+{
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+
+  Serial.println("To the Side");
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], Duration);
+  delay(Pause);
+}
+
+void SideToCentre(int Duration, int Pause)
+{
+  Serial.println("To The side");
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], Duration);
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+}
+
+void CentreToMiddle(int Duration, int Pause)
+{
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+
+  Serial.println("To the middle");
+  MoveServos(MIDDLE[0], MIDDLE[1], MIDDLE[2], Duration);
+  delay(Pause);
+}
+
+void MiddleToCentre(int Duration, int Pause)
+{
+  Serial.println("To the middle");
+  MoveServos(MIDDLE[0], MIDDLE[1], MIDDLE[2], Duration);
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+}
+
+void CentreToBottom(int Duration, int Pause)
+{
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+
+  Serial.println("To the bottom");
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], Duration);
+  delay(Pause);
+}
+
+void BottomToCentre(int Duration, int Pause)
+{
+  Serial.println("To The bottom");
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], Duration);
+  Serial.println("Above the centre");
+  MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], Duration);
+  delay(Pause);
+}
+
+void FrontToBack(int Duration, int Pause)
+{
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], 10);
+  MoveServos(BACK[0], BACK[1], BACK[2], Duration);
+  delay(Pause);
+}
+
+void BackToFront(int Duration, int Pause)
+{
+  MoveServos(BACK[0], BACK[1], BACK[2], 10);
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration);
+  delay(Pause);
+}
+
+//tee hee
+void FrontBottomBack(int Duration, int Pause)
+{
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], 10);
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], Duration / 2);
+  MoveServos(BACK[0], BACK[1], BACK[2], Duration / 2);
+  delay(Pause);
+}
+
+void BackBottomFront(int Duration, int Pause)
+{
+  MoveServos(BACK[0], BACK[1], BACK[2], 10);
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], Duration / 2);
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration / 2);
+  delay(Pause);
+}
+
+
+void Sequence_1()
+{
+  CentreToFront(2000, 1000);
+
+  FrontToBack(2000, 1000);
+  BackToFront(2000, 1000);
+  FrontToBack(2000, 1000);
+  BackToFront(2000, 1000);
+
+  FrontToCentre(2000, 10);
+}
+
+
+void Sequence_2()
+{
+  CentreToFront(2000, 1000);
+
+  FrontBottomBack(2000, 1000);
+  BackBottomFront(2000, 1000);
+  FrontBottomBack(2000, 1000);
+  BackBottomFront(2000, 1000);
+
+  FrontToCentre(2000, 10);
+}
+
+void Sequence_3()
+{
+  CentreToFront(4000, 1000);
+
+  FrontBottomBack(4000, 1000);
+  BackBottomFront(4000, 1000);
+  FrontBottomBack(4000, 1000);
+  BackBottomFront(4000, 1000);
+
+  FrontToCentre(4000, 10);
+}
+
+void Sequence_4()
+{
+  CentreToSide(2000, 1000);
+  
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], 2000);
+  delay(1000);
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 2000);
+  delay(1000);
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], 2000);
+
+  SideToCentre(2000, 1000);
 }
 
 
@@ -227,25 +443,64 @@ void CheckAllPos(int Duration, int Pause)
 
 void setup() {
   // put your setup code here, to run once:
-	Serial.begin(115200);
-
-	MakeCurveProfile();
-
-	BaseServo.attach(BasePin);
-	LeftServo.attach(LeftPin);
-	RightServo.attach(RightPin);
-
-	Serial.println("Hello");
-
-	goNow(HOME[0], HOME[1], HOME[2]);
+  pinMode(IndicatorPin, OUTPUT);
+  digitalWrite(IndicatorPin, 0);
 
 
-	CheckAllPos(1000, 1000);
+
+  Serial.begin(115200);
+
+  MakeCurveProfile();
 
 
-	BaseServo.detach();
-	LeftServo.detach();
-	RightServo.detach();
+  digitalWrite(IndicatorPin, 1);
+  delay(1);
+  digitalWrite(IndicatorPin, 0);
+
+  delay(5000);
+
+  digitalWrite(IndicatorPin, 1);
+  delay(1);
+  digitalWrite(IndicatorPin, 0);
+
+
+
+
+  BaseServo.attach(BasePin);
+  LeftServo.attach(LeftPin);
+  RightServo.attach(RightPin);
+
+  Serial.println("Hello");
+
+  goNow(START[0], START[1], START[2]);
+
+  StartToCentre(1000, 250);
+  Serial.println("Lets move this stuff about");
+
+  //CheckAllPos();
+
+  digitalWrite(IndicatorPin, 1);
+  delay(1);
+  digitalWrite(IndicatorPin, 0);
+
+  Sequence_3();
+
+  digitalWrite(IndicatorPin, 1);
+  delay(1);
+  digitalWrite(IndicatorPin, 0);
+
+
+
+
+
+
+  delay(1000);
+  CentreToStart(1000, 250);
+
+
+  BaseServo.detach();
+  LeftServo.detach();
+  RightServo.detach();
 
 
 

@@ -13,6 +13,9 @@ void setup() {
   myservo0.attach(7);  // attaches the servo on pin 11 to the servo object
   myservo1.attach(4);  // attaches the servo on pin 10 to the servo object
   myservo2.attach(2);  // attaches the servo on pin 9 to the servo object
+        myservo0.write(40);
+      myservo1.write(130);
+      myservo2.write(100);
   Serial.println("hello, this is a servo test");
 }
 
