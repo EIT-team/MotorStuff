@@ -16,6 +16,7 @@ int RightMin = 50;
 int RightMax = 179;
 
 int IndicatorPin = 30;
+int LEDPin = 10;
 
 
 // above centre 104,135,80
@@ -390,14 +391,9 @@ void BackBottomFront(int Duration, int Pause)
 
 void Sequence_1()
 {
-  CentreToFront(2000, 1000);
+  CentreToFront(4000, 8000);
 
-  FrontToBack(2000, 1000);
-  BackToFront(2000, 1000);
-  FrontToBack(2000, 1000);
-  BackToFront(2000, 1000);
-
-  FrontToCentre(2000, 10);
+  FrontToCentre(4000, 10);
 }
 
 
@@ -438,6 +434,111 @@ void Sequence_4()
   SideToCentre(2000, 1000);
 }
 
+void Sequence_5()
+{
+  CentreToFront(8000, 2000);
+
+  FrontBottomBack(8000, 2000);
+  BackBottomFront(8000, 2000);
+  FrontBottomBack(8000, 2000);
+  BackBottomFront(8000, 2000);
+
+  FrontToCentre(8000, 10);
+}
+
+void Sequence_6()
+{
+  CentreToBack(4000, 8000);
+
+
+  BackToCentre(4000, 10);
+}
+
+
+void Sequence_7()
+{
+   CentreToSide(4000, 8000);
+   SideToCentre(4000, 10);
+}
+
+
+void Sequence_8()
+{
+  CentreToFront(2000, 8000);
+
+  FrontBottomBack(10000, 8000);
+  BackBottomFront(10000, 8000);
+  FrontBottomBack(10000, 8000);
+  BackBottomFront(10000, 8000);
+
+  FrontToCentre(2000, 10);
+}
+
+void Sequence_9()
+{
+  CentreToFront(1000, 500);
+
+  FrontBottomBack(1000, 500);
+  BackBottomFront(1000, 500);
+  FrontBottomBack(1000, 500);
+  BackBottomFront(1000, 500);
+
+  FrontToCentre(1000, 10);
+}
+
+void Sequence_10()
+{
+  CentreToFront(1000, 500);
+
+  FrontBottomBack(1000, 500);
+  
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 1000);
+  delay(500);
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], 1000);
+  delay(500);
+
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], 1000);
+  delay(500);
+
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 1000);
+  delay(500);
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], 1000);
+  delay(500);
+
+  
+  MoveServos(BACK[0], BACK[1], BACK[2], 1000);
+  delay(500);
+  BackBottomFront(1000, 500);
+
+  FrontToCentre(1000, 10);
+}
+
+void Sequence_11()
+{
+  CentreToFront(2000, 500);
+
+  FrontBottomBack(2000, 500);
+  
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 2000);
+  delay(500);
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], 2000);
+  delay(500);
+
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], 2000);
+  delay(500);
+
+  MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 2000);
+  delay(500);
+  MoveServos(SIDE[0], SIDE[1], SIDE[2], 2000);
+  delay(500);
+
+  
+  MoveServos(BACK[0], BACK[1], BACK[2], 2000);
+  delay(500);
+  BackBottomFront(2000, 500);
+
+  FrontToCentre(2000, 10);
+}
 
 
 
@@ -445,6 +546,8 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(IndicatorPin, OUTPUT);
   digitalWrite(IndicatorPin, 0);
+  pinMode(LEDPin, OUTPUT);
+  digitalWrite(LEDPin, 0);
 
 
 
@@ -482,13 +585,14 @@ void setup() {
   digitalWrite(IndicatorPin, 1);
   delay(1);
   digitalWrite(IndicatorPin, 0);
+  digitalWrite(LEDPin, 1);
 
-  Sequence_3();
+  Sequence_8();
 
   digitalWrite(IndicatorPin, 1);
   delay(1);
   digitalWrite(IndicatorPin, 0);
-
+digitalWrite(LEDPin, 0);
 
 
 
