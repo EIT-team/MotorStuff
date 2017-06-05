@@ -474,6 +474,18 @@ void Sequence_8()
   FrontToCentre(2000, 10);
 }
 
+void Sequence_8A()
+{
+  CentreToFront(1000, 4000);
+
+  FrontBottomBack(5000, 4000);
+  BackBottomFront(5000, 4000);
+  FrontBottomBack(5000, 4000);
+  BackBottomFront(5000, 4000);
+
+  FrontToCentre(1000, 10);
+}
+
 void Sequence_9()
 {
   CentreToFront(1000, 500);
@@ -587,7 +599,7 @@ void setup() {
   digitalWrite(IndicatorPin, 0);
   digitalWrite(LEDPin, 1);
 
-  Sequence_8();
+  Sequence_11();
 
   digitalWrite(IndicatorPin, 1);
   delay(1);
