@@ -424,7 +424,7 @@ void Sequence_3()
 void Sequence_4()
 {
   CentreToSide(2000, 1000);
-  
+
   MoveServos(FRONT[0], FRONT[1], FRONT[2], 2000);
   delay(1000);
   MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 2000);
@@ -457,8 +457,8 @@ void Sequence_6()
 
 void Sequence_7()
 {
-   CentreToSide(4000, 8000);
-   SideToCentre(4000, 10);
+  CentreToSide(4000, 8000);
+  SideToCentre(4000, 10);
 }
 
 
@@ -503,7 +503,7 @@ void Sequence_10()
   CentreToFront(1000, 500);
 
   FrontBottomBack(1000, 500);
-  
+
   MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 1000);
   delay(500);
   MoveServos(SIDE[0], SIDE[1], SIDE[2], 1000);
@@ -517,7 +517,7 @@ void Sequence_10()
   MoveServos(SIDE[0], SIDE[1], SIDE[2], 1000);
   delay(500);
 
-  
+
   MoveServos(BACK[0], BACK[1], BACK[2], 1000);
   delay(500);
   BackBottomFront(1000, 500);
@@ -530,7 +530,7 @@ void Sequence_11()
   CentreToFront(2000, 500);
 
   FrontBottomBack(2000, 500);
-  
+
   MoveServos(BOTTOM[0], BOTTOM[1], BOTTOM[2], 2000);
   delay(500);
   MoveServos(SIDE[0], SIDE[1], SIDE[2], 2000);
@@ -544,7 +544,7 @@ void Sequence_11()
   MoveServos(SIDE[0], SIDE[1], SIDE[2], 2000);
   delay(500);
 
-  
+
   MoveServos(BACK[0], BACK[1], BACK[2], 2000);
   delay(500);
   BackBottomFront(2000, 500);
@@ -599,14 +599,27 @@ void setup() {
   digitalWrite(IndicatorPin, 0);
   digitalWrite(LEDPin, 1);
 
+
+
+  /*###################################################
+     ###################################################
+     ###################################################
+  */
+
+
   Sequence_11();
+
+
+  /*###################################################
+     ###################################################
+     ###################################################
+  */
+
 
   digitalWrite(IndicatorPin, 1);
   delay(1);
   digitalWrite(IndicatorPin, 0);
-digitalWrite(LEDPin, 0);
-
-
+  digitalWrite(LEDPin, 0);
 
 
 
