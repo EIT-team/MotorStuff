@@ -48,11 +48,11 @@ void CentreToFront(int Duration, int Pause)
   Serial.println("Above the centre");
   MoveServos(ABOVECENTRE[0], ABOVECENTRE[1], ABOVECENTRE[2], 20);
 
-  MoveServos(FRONT_INTER[0], FRONT_INTER[1], FRONT_INTER[2], Duration/2);
+  //MoveServos(FRONT_INTER[0], FRONT_INTER[1], FRONT_INTER[2], Duration/2);
 
 
   Serial.println("To The front");
-  MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration/2);
+  MoveServos(FRONT[0], FRONT[1], FRONT[2], Duration);
   delay(Pause);
 }
 
